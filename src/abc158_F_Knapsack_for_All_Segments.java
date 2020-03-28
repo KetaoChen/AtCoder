@@ -1,9 +1,8 @@
 import java.io.*;
-import java.util.*;
-import java.lang.*;
+import java.util.InputMismatchException;
 
 
-public class Main implements Runnable
+public class abc158_F_Knapsack_for_All_Segments implements Runnable
 {
     @Override
     public void run() {
@@ -24,9 +23,12 @@ public class Main implements Runnable
     private static int getRes(int[] arr, int S) {
         long res = 0;
         int mod = 998244353, l = arr.length;
+        // dp[i][s] represent for the first ith items, the total number of (L, Ai, ... Ak) with sum of s.
         long[][] dp = new long[l + 1][S + 1];
         dp[0][0] = 1;
         for (int i = 1; i <= l; i++) {
+            // !! initiate, dp[i][0] means how many 0 value interval for first ith items.
+            // for first 3 items. [0,0], [0,1], [0,2], [0,3], each of them include one value 0.
             dp[i][0] = i + 1;
             for (int s = 1; s <= S; s++) {
                 dp[i][s] = dp[i - 1][s] % mod;
@@ -34,6 +36,7 @@ public class Main implements Runnable
                     dp[i][s] = (dp[i][s] + dp[i - 1][s - arr[i - 1]]) % mod;
                 }
             }
+            // !!! when we calculate the answer, we need to make sure the value of R is i.
             if (arr[i - 1] <= S) {
                 res = (res + dp[i - 1][S - arr[i - 1]] * (l - i + 1) % mod) % mod;
             }
@@ -224,7 +227,7 @@ public class Main implements Runnable
 
     public static void main(String args[]) throws Exception
     {
-        new Thread(null, new Main(),"Main",1<<27).start();
+        new Thread(null, new abc158_F_Knapsack_for_All_Segments(),"Main",1<<27).start();
     }
 
 }
