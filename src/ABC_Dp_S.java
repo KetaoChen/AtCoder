@@ -1,5 +1,7 @@
 import java.io.*;
+import java.util.ArrayList;
 import java.util.InputMismatchException;
+import java.util.List;
 
 
 public class ABC_Dp_S implements Runnable
@@ -16,7 +18,7 @@ public class ABC_Dp_S implements Runnable
     }
 
     private static long getRes(String K, int D) {
-        long res = 0;
+        List<Integer> list = new ArrayList<>();
         int mod = (int) (1e9 + 7), l = K.length(), sum = 0;
         // dp[i][j] means the number of seq,  at index i, the sum % D = j except 0 and upper bound.
         long[][] dp = new long[l + 1][D + 1];
