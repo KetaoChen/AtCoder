@@ -1,45 +1,46 @@
 import java.io.*;
-import java.util.*;
-import java.lang.*;
+import java.util.InputMismatchException;
 
 
-public class Main implements Runnable
+public class ABC_Dp_I implements Runnable
 {
     @Override
     public void run() {
         InputReader in = new InputReader(System.in);
         PrintWriter w = new PrintWriter(System.out);
-        int N = in.nextInt();
-        int K = in.nextInt();
+        int N = (int) in.nextDouble();
 
-        int[] arr = new int[N];
+        double[] arr = new double[N];
         for (int i = 0; i < N; i++) {
-            arr[i] = in.nextInt();
+            arr[i] = in.nextDouble();
         }
-        w.println(getRes(arr, K));
+        w.println(getRes(arr));
 
         w.flush();
         w.close();
     }
 
-    private static long getRes(int[] arr, int K) {
-        // dp[i][j] is the number of ways for first ith children, with j candy hand out
-        int l = arr.length, mod = (int) (1e9 + 7);
-        long[][] dp = new long[l + 1][K + 1];
-        dp[0][0] = 1;
+    private static double getRes(double[] arr) {
+        // dp[i][j] is the probability for first ith coins, with j facing up
+        int l = arr.length;
+        double[][] dp = new double[l + 1][l + 1];
+        dp[0][0] = 1.0;
 
         for (int i = 1; i <= l; i++) {
-            long sum = 0;
-            for (int j = 0; j <= K; j++) {
-                sum = (sum + dp[i - 1][j]) % mod;
-                if (j - arr[i - 1] > 0) {
-                    sum = (sum - dp[i - 1][j - arr[i - 1] - 1]) % mod;
+            for (int j = 0; j <= i; j++) {
+                if (j == 0) {
+                    dp[i][j] = dp[i - 1][j] * (1 - arr[i - 1]);
+                    continue;
                 }
-                dp[i][j] = sum;
+                dp[i][j] = dp[i - 1][j] * (1 - arr[i - 1]) + dp[i - 1][j - 1] * arr[i - 1];
             }
         }
 
-        return (dp[l][K] + mod) % mod;
+        double res = 0.0;
+        for (int i = l / 2 + 1; i <= l; i++) {
+            res += dp[l][i];
+        }
+        return res;
     }
 
 
@@ -224,7 +225,7 @@ public class Main implements Runnable
 
     public static void main(String args[]) throws Exception
     {
-        new Thread(null, new Main(),"Main",1<<27).start();
+        new Thread(null, new ABC_Dp_I(),"Main",1<<27).start();
     }
 
 }
