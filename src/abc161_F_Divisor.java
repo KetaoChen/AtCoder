@@ -1,42 +1,43 @@
 import java.io.*;
-import java.util.*;
-import java.lang.*;
+import java.util.HashSet;
+import java.util.InputMismatchException;
+import java.util.Set;
 
 
-public class Main implements Runnable
+public class abc161_F_Divisor implements Runnable
 {
     @Override
     public void run() {
         InputReader in = new InputReader(System.in);
         PrintWriter w = new PrintWriter(System.out);
-        int N = in.nextInt();
-        int[][] arr = new int[N][N];
-        for (int i = 0; i < N; i++) {
-            for (int j = 0; j < N; j++) {
-                arr[i][j] = in.nextInt();
-            }
-        }
-        w.println(getRes(arr, N));
+        long N = in.nextLong();
+        w.println(getRes(N));
 
         w.flush();
         w.close();
     }
 
-    private static int getRes(int[][] arr, int n) {
-        int mod = (int) (1e9 + 7);
-        // dp[i] represent the number of combo, up to the current female, the set of matched males
-        long[] dp = new long[1 << n];
-        dp[0] = 1;
-
-        for (int j = 0; j < 1 << n; j++) {
-            int i = Integer.bitCount(j) - 1;
-            for (int k = 0; k < n; k++) {
-                if ((j >> k & 1) == 1 && arr[k][i] == 1) {
-                    dp[j] = (dp[j] + dp[j ^ 1 << k]) % mod;
-                }
+    private static int getRes(long N) {
+        if (N == 2) return 1;
+        Set<Long> set = new HashSet<>();
+        set.add(N);
+        set.add(N - 1);
+        for (long i = 2; i * i <= N; i++) {
+            long temp = N;
+            while (temp % i == 0) temp /= i;
+            if (temp % i == 1) set.add(i);
+        }
+        N--;
+        for (long i = 2; i * i <= N; i++) {
+            if (N % i == 0) {
+                set.add(i);
+                set.add(N / i);
             }
         }
-        return (int) dp[(1 << n) - 1];
+//        for (long l : set) {
+//            System.out.print(l + " ");
+//        }
+        return set.size();
     }
 
 
@@ -221,7 +222,7 @@ public class Main implements Runnable
 
     public static void main(String args[]) throws Exception
     {
-        new Thread(null, new Main(),"Main",1<<27).start();
+        new Thread(null, new abc161_F_Divisor(),"Main",1<<27).start();
     }
 
 }

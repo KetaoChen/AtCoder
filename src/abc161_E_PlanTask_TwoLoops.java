@@ -1,42 +1,51 @@
 import java.io.*;
-import java.util.*;
-import java.lang.*;
+import java.util.InputMismatchException;
 
 
-public class Main implements Runnable
+public class abc161_E_PlanTask_TwoLoops implements Runnable
 {
     @Override
     public void run() {
         InputReader in = new InputReader(System.in);
         PrintWriter w = new PrintWriter(System.out);
-        int N = in.nextInt();
-        int[][] arr = new int[N][N];
-        for (int i = 0; i < N; i++) {
-            for (int j = 0; j < N; j++) {
-                arr[i][j] = in.nextInt();
-            }
-        }
-        w.println(getRes(arr, N));
+        String[] strs = in.nextLine().split(" ");
+        int N = Integer.parseInt(strs[0]), K = Integer.parseInt(strs[1]), C = Integer.parseInt(strs[2]);
+        String s = in.nextLine();
+
+        getRes(K, C, s, w);
 
         w.flush();
         w.close();
     }
 
-    private static int getRes(int[][] arr, int n) {
-        int mod = (int) (1e9 + 7);
-        // dp[i] represent the number of combo, up to the current female, the set of matched males
-        long[] dp = new long[1 << n];
-        dp[0] = 1;
-
-        for (int j = 0; j < 1 << n; j++) {
-            int i = Integer.bitCount(j) - 1;
-            for (int k = 0; k < n; k++) {
-                if ((j >> k & 1) == 1 && arr[k][i] == 1) {
-                    dp[j] = (dp[j] + dp[j ^ 1 << k]) % mod;
-                }
+    private static void getRes(int K, int C, String s, PrintWriter w) {
+        // dp[i][j] is the number of ways for first ith children, with j candy hand out
+        int[] startFromLeft = new int[K];
+        int index = 0, l = s.length(), cur = 0;
+        while (index < l && cur < K) {
+            char c = s.charAt(index++);
+            if (c == 'o') {
+                startFromLeft[cur++] = index - 1;
+                index += C;
             }
         }
-        return (int) dp[(1 << n) - 1];
+
+        int[] startFromRight = new int[K];
+        index = l - 1;
+        cur = K - 1;
+        while (index >= 0 && cur >= 0) {
+            char c = s.charAt(index--);
+            if (c == 'o') {
+                startFromRight[cur--] = index + 1;
+                index -= C;
+            }
+        }
+
+        for (int i = 0; i < K; i++) {
+            if (startFromLeft[i] == startFromRight[i]) {
+                w.print(startFromLeft[i] + 1 + " ");
+            }
+        }
     }
 
 
@@ -221,7 +230,7 @@ public class Main implements Runnable
 
     public static void main(String args[]) throws Exception
     {
-        new Thread(null, new Main(),"Main",1<<27).start();
+        new Thread(null, new abc161_E_PlanTask_TwoLoops(),"Main",1<<27).start();
     }
 
 }
