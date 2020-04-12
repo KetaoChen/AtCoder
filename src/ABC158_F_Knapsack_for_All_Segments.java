@@ -1,64 +1,51 @@
 import java.io.*;
-import java.util.*;
-import java.lang.*;
+import java.util.InputMismatchException;
 
 
-public class Main implements Runnable
+public class ABC158_F_Knapsack_for_All_Segments implements Runnable
 {
-    final static int mod = (int) (1e9 + 7);
     @Override
     public void run() {
         InputReader in = new InputReader(System.in);
         PrintWriter w = new PrintWriter(System.out);
-        long n = in.nextLong();
-        long a = in.nextLong();
-        long b = in.nextLong();
+        int N = in.nextInt();
+        int S = in.nextInt();
+        int[] arr = new int[N];
+        for (int i = 0; i < N; i++) {
+            arr[i] = in.nextInt();
+        }
 
-        getRes(w, n, a, b);
+        w.println(getRes(arr, S));
         w.flush();
         w.close();
     }
 
-    private static void getRes(PrintWriter w, long n, long a, long b) {
-        if (n == 2) {
-            w.println(0);
-            return;
-        }
-        long exp = fastExp(2L, n);
-        long removeA = combo(n, a);
-        long removeB = combo(n, b);
-        long res = (exp - 1 - removeA - removeB + 2L * mod) % mod;
-        w.println(res);
-    }
-
-    private static long combo(long n, long m) {
-        long[] inv = getInvArray(m, mod);
-        long res = 1;
-        for (int i = 1; i <= m; i++) {
-            res = (res * (n - i + 1) % mod) * inv[i] % mod;
-        }
-        return res;
-    }
-
-    public  static long[] getInvArray(long n, int p){
-        long[] inv = new long[(int)n + 1];
-        inv[1] = 1;
-        for (int i = 2; i <= n; i++) {
-            inv[i] = ((p - p / i) * inv[p % i] % p + p) % p;
-        }
-        return inv;
-    }
-
-    private static long fastExp(long base, long n) {
-        if (n == 1) {
-            return base;
-        }
-        if (n % 2 == 1) {
-            return base * fastExp(base,n - 1) % mod;
+    private static int getRes(int[] arr, int S) {
+        long res = 0;
+        int mod = 998244353, l = arr.length;
+        // dp[i][s] represent for the first ith items, the total number of (L, Ai, ... Ak) with sum of s.
+        long[][] dp = new long[l + 1][S + 1];
+        dp[0][0] = 1;
+        for (int i = 1; i <= l; i++) {
+            // !! initiate, dp[i][0] means how many 0 value interval for first ith items.
+            // for first 3 items. [0,0], [0,1], [0,2], [0,3], each of them include one value 0.
+            dp[i][0] = i + 1;
+            for (int s = 1; s <= S; s++) {
+                dp[i][s] = dp[i - 1][s] % mod;
+                if (s >= arr[i - 1]) {
+                    dp[i][s] = (dp[i][s] + dp[i - 1][s - arr[i - 1]]) % mod;
+                }
+            }
+            // !!! when we calculate the answer, we need to make sure the value of R is i.
+            if (arr[i - 1] <= S) {
+                res = (res + dp[i - 1][S - arr[i - 1]] * (l - i + 1) % mod) % mod;
+            }
         }
 
-        return fastExp(base * base % mod, n / 2);
+        return (int) res;
     }
+
+
 
     static class InputReader
     {
@@ -240,7 +227,7 @@ public class Main implements Runnable
 
     public static void main(String args[]) throws Exception
     {
-        new Thread(null, new Main(),"Main",1<<27).start();
+        new Thread(null, new ABC158_F_Knapsack_for_All_Segments(),"Main",1<<27).start();
     }
 
 }

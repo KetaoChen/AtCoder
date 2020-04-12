@@ -2,7 +2,7 @@ import java.io.*;
 import java.util.InputMismatchException;
 
 
-public class abc161_E_PlanTask_TwoLoops implements Runnable
+public class ABC161_E_PlanTask_TwoLoops implements Runnable
 {
     @Override
     public void run() {
@@ -230,7 +230,7 @@ public class abc161_E_PlanTask_TwoLoops implements Runnable
 
     public static void main(String args[]) throws Exception
     {
-        new Thread(null, new abc161_E_PlanTask_TwoLoops(),"Main",1<<27).start();
+        new Thread(null, new ABC161_E_PlanTask_TwoLoops(),"Main",1<<27).start();
     }
 
 }

@@ -1,46 +1,63 @@
 import java.io.*;
-import java.util.HashSet;
 import java.util.InputMismatchException;
-import java.util.Set;
 
 
-public class abc161_F_Divisor implements Runnable
+public class ABC156_D_fastExp_Combo implements Runnable
 {
+    final static int mod = (int) (1e9 + 7);
     @Override
     public void run() {
         InputReader in = new InputReader(System.in);
         PrintWriter w = new PrintWriter(System.out);
-        long N = in.nextLong();
-        w.println(getRes(N));
+        long n = in.nextLong();
+        long a = in.nextLong();
+        long b = in.nextLong();
 
+        getRes(w, n, a, b);
         w.flush();
         w.close();
     }
 
-    private static int getRes(long N) {
-        if (N == 2) return 1;
-        Set<Long> set = new HashSet<>();
-        set.add(N);
-        set.add(N - 1);
-        for (long i = 2; i * i <= N; i++) {
-            long temp = N;
-            while (temp % i == 0) temp /= i;
-            if (temp % i == 1) set.add(i);
+    private static void getRes(PrintWriter w, long n, long a, long b) {
+        if (n == 2) {
+            w.println(0);
+            return;
         }
-        N--;
-        for (long i = 2; i * i <= N; i++) {
-            if (N % i == 0) {
-                set.add(i);
-                set.add(N / i);
-            }
-        }
-//        for (long l : set) {
-//            System.out.print(l + " ");
-//        }
-        return set.size();
+        long exp = fastExp(2L, n);
+        long removeA = combo(n, a);
+        long removeB = combo(n, b);
+        long res = (exp - 1 - removeA - removeB + 2L * mod) % mod;
+        w.println(res);
     }
 
+    private static long combo(long n, long m) {
+        long[] inv = getInvArray(m, mod);
+        long res = 1;
+        for (int i = 1; i <= m; i++) {
+            res = (res * (n - i + 1) % mod) * inv[i] % mod;
+        }
+        return res;
+    }
 
+    public  static long[] getInvArray(long n, int p){
+        long[] inv = new long[(int)n + 1];
+        inv[1] = 1;
+        for (int i = 2; i <= n; i++) {
+            inv[i] = ((p - p / i) * inv[p % i] % p + p) % p;
+        }
+        return inv;
+    }
+
+    private static long fastExp(long base, long n) {
+        if (n == 1) {
+            return base;
+        }
+        if (n % 2 == 1) {
+            return base * fastExp(base,n - 1) % mod;
+        }
+
+        return fastExp(base * base % mod, n / 2);
+    }
 
     static class InputReader
     {
@@ -222,7 +239,7 @@ public class abc161_F_Divisor implements Runnable
 
     public static void main(String args[]) throws Exception
     {
-        new Thread(null, new abc161_F_Divisor(),"Main",1<<27).start();
+        new Thread(null, new ABC156_D_fastExp_Combo(),"Main",1<<27).start();
     }
 
 }
