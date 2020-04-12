@@ -1,60 +1,71 @@
 import java.io.*;
-import java.util.*;
-import java.lang.*;
+import java.util.InputMismatchException;
 
 
-public class Main implements Runnable
+public class ABC156_E_Combo_RepeatPick implements Runnable
 {
     final static int mod = (int) (1e9 + 7);
     @Override
     public void run() {
         InputReader in = new InputReader(System.in);
         PrintWriter w = new PrintWriter(System.out);
-        long n = in.nextLong();
-        long a = in.nextLong();
-        long b = in.nextLong();
+        int n = in.nextInt();
+        int k = in.nextInt();
 
-        getRes(w, n, a, b);
+        getRes(w, n, k);
         w.flush();
         w.close();
     }
 
-    private static void getRes(PrintWriter w, long n, long a, long b) {
-        if (n == 2) {
-            w.println(0);
-            return;
+    private static void getRes(PrintWriter w, int n, int k) {
+        // divide the situation into the number of rooms, that does not have people.
+        // consider all room have people, res++, if 1 room is empty, res += (n - 1) * n ;
+        long res = (n - 1) * (long) n % mod + 1;
+        // 1 move we can only move one person, so at most we can make min(n-1, k) room empty
+        k = Math.min(n - 1, k);
+        // consider at least two rooms are empty.
+        // if two rooms are empty, then, n people in n-2 rooms, each one has at least 1 people.
+        // mean that there are only people we can choose any room to enter.
+        // this combo can be combo((n-1 - i) + i, i), means we need to put i people in n-1 rooms.
+        // then we need to multiply the combo of choosing empty room. combo(n, i);
+        long[] inv = getInvArray(n, mod);
+//        System.out.println(inv[2]);
+//        System.out.println(2 * inv[2] % mod);
+
+        long roomCombo = n, peopleCombo = n - 1;
+
+        for (int i = 2; i <= k; i++) {
+            roomCombo = ((roomCombo * (n + 1 - i) % mod) * inv[i]) % mod;
+            peopleCombo = ((peopleCombo * (n - i) % mod) * inv[i]) % mod;
+            long add = roomCombo * peopleCombo % mod;
+
+            // System.out.println(i + " " + add);
+            res = (res + add + mod) % mod;
         }
-        long exp = fastExp(2L, n);
-        long removeA = combo(n, a);
-        long removeB = combo(n, b);
-        long res = (exp - 1 - removeA - removeB + 2L * mod) % mod;
-        w.println(res);
-    }
-
-    private static long fastExp(long i, long n) {
-        if (n == 1) return i;
-        if (n % 2 == 0) return fastExp(i * i % mod, n / 2) % mod;
-        return i * fastExp(i * i % mod, n / 2) % mod;
-    }
-
-    private static long combo(long n, long m) {
-        long[] inv = getInvArray(m, mod);
-        long res = 1;
-        for (int i = 1; i <= m; i++) {
-            res = (res * (n - i + 1) % mod) * inv[i] % mod;
-        }
-        return res;
+        w.println((res + mod) % mod);
     }
 
 
-
-    private static long[] getInvArray(long n, int mod) {
-        long[] res = new long[(int)n + 1];
-        res[1] = 1;
+    // get the inverse of number from 1-n, when mod==p.
+    public  static long[] getInvArray(long n, int p){
+        long[] inv = new long[(int)n + 1];
+        inv[1] = 1;
         for (int i = 2; i <= n; i++) {
-            res[i] = (mod - mod / i) * res[mod % i] % mod;
+            inv[i] = ((p - p / i) * inv[p % i] % p + p) % p;
         }
-        return res;
+        return inv;
+    }
+
+    // fast Exponent
+    private static long fastExp(long base, long n) {
+        if (n == 1) {
+            return base;
+        }
+        if (n % 2 == 1) {
+            return base * fastExp(base,n - 1) % mod;
+        }
+
+        return fastExp(base * base % mod, n / 2);
     }
 
     static class InputReader
@@ -237,7 +248,7 @@ public class Main implements Runnable
 
     public static void main(String args[]) throws Exception
     {
-        new Thread(null, new Main(),"Main",1<<27).start();
+        new Thread(null, new ABC156_E_Combo_RepeatPick(),"Main",1<<27).start();
     }
 
 }

@@ -30,6 +30,12 @@ public class ABC156_D_fastExp_Combo implements Runnable
         w.println(res);
     }
 
+    private static long fastExp(long i, long n) {
+        if (n == 1) return i;
+        if (n % 2 == 0) return fastExp(i * i % mod, n / 2) % mod;
+        return i * fastExp(i * i % mod, n / 2) % mod;
+    }
+
     private static long combo(long n, long m) {
         long[] inv = getInvArray(m, mod);
         long res = 1;
@@ -39,24 +45,15 @@ public class ABC156_D_fastExp_Combo implements Runnable
         return res;
     }
 
-    public  static long[] getInvArray(long n, int p){
-        long[] inv = new long[(int)n + 1];
-        inv[1] = 1;
+
+
+    private static long[] getInvArray(long n, int mod) {
+        long[] res = new long[(int)n + 1];
+        res[1] = 1;
         for (int i = 2; i <= n; i++) {
-            inv[i] = ((p - p / i) * inv[p % i] % p + p) % p;
+            res[i] = (mod - mod / i) * res[mod % i] % mod;
         }
-        return inv;
-    }
-
-    private static long fastExp(long base, long n) {
-        if (n == 1) {
-            return base;
-        }
-        if (n % 2 == 1) {
-            return base * fastExp(base,n - 1) % mod;
-        }
-
-        return fastExp(base * base % mod, n / 2);
+        return res;
     }
 
     static class InputReader
