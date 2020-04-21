@@ -1,112 +1,49 @@
 import java.io.*;
-import java.util.*;
-import java.lang.*;
+import java.util.Arrays;
+import java.util.InputMismatchException;
 
 
-public class Main implements Runnable
+public class ABC163_E_Active_Infants_Dp_Greedy_Sort implements Runnable
 {
+    final static int mod = (int) (1e9 + 7);
     @Override
     public void run() {
         InputReader in = new InputReader(System.in);
         PrintWriter w = new PrintWriter(System.out);
         int n = in.nextInt();
-        int[] arr = new int[n];
-        for (int i = 0; i < n; i++) {
-            arr[i] = in.nextInt();
+        int[][] arr = new int[n + 1][2];
+        for (int i = 1; i <= n; i++) {
+            arr[i][0] = in.nextInt();
+            arr[i][1] = i;
         }
-        getRes(arr, w);
 
+        getRes(w, arr);
         w.flush();
         w.close();
     }
 
-    private static void getRes(int[] arr, PrintWriter w) {
-        // System.out.println("Start!");
-        int l = arr.length;
-        long[][] g = new long[l][l];
-        for (int i = 0; i < l; i++) {
-            for (int j = 0; j < l; j++) {
-                if (i == j) continue;
-                g[i][j] = (long)arr[i] * Math.abs(i - j);
+    private static void getRes(PrintWriter w, int[][] arr) {
+        // 1. first observation is that we need to consider how to put the largest number.
+        // 2. the largest number should go to the first position or the last position.
+        // 3. after we sort the numbers, when we add a new number into the array, it can only be in the first or last.
+        // 4. but the contribution is also related to positions, so want to know which position this number will go.
+
+        // dp[i][j] is the maximum value we can get when we put j number in front of our first ith number.
+        // we do not need to care what are those j numbers, nor the order of the first ith number.
+        // the new number will go to the j + 1 position, or i + j + 1 position.
+
+        Arrays.sort(arr, (a, b) -> (a[0] - b[0]));
+        int l = arr.length - 1;
+        long[][] dp = new long[l + 1][l + 1];
+        for (int i = 1; i <= l; i++) {
+            for (int j = 0; j <= l - i; j++) {
+                dp[i][j] = Math.max(dp[i][j], dp[i - 1][j] + (Math.abs(i + j - arr[i][1]) * (long)arr[i][0]));
+                dp[i][j] = Math.max(dp[i][j], dp[i - 1][j + 1] + (Math.abs(j + 1 - arr[i][1]) * (long)arr[i][0]));
             }
         }
 
-        long res = 0;
-        boolean[] visx = new boolean[l];
-        boolean[] visy = new boolean[l];
-        long[] lx = new long[l], ly = new long[l];
-        int[] match = new int[l];
-
-        for (int i = 0; i < l; i++) {
-            for (int j = 0; j < l; j++) {
-                if (lx[i] < g[i][j]) {
-                    lx[i] = g[i][j];
-                }
-            }
-        }
-        Arrays.fill(match, -1);
-
-        for (int i = 0; i < l; i++) {
-            while (true) {
-                // System.out.println("while bug");
-                Arrays.fill(visx, false);
-                Arrays.fill(visy, false);
-                if (find(g, match, visx, visy, lx, ly, i)) break;
-
-                long d = Long.MAX_VALUE;
-                for (int j = 0; j < l; j++) {
-                    if (visx[j]) {
-                        for (int k = 0; k < l; k++) {
-                            if (!visy[k]) {
-                                d = Math.min(d, lx[j] + ly[k] - g[j][k]);
-                            }
-                        }
-                    }
-                }
-                if (d == Integer.MAX_VALUE) {
-                    System.out.println("getres " + res);
-                    return;
-                }
-                for (int j = 0; j < l; j++) {
-                    if (visx[j]) {
-                        lx[j] -= d;
-                    }
-                }
-                for (int j = 0; j < l; j++) {
-                    if (visy[j]) {
-                        ly[j] += d;
-                    }
-                }
-            }
-        }
-
-        // System.out.println("finish while");
-        for (int i = 0; i < l; i++) {
-            if (match[i] != - 1) {
-                res += g[match[i]][i];
-            }
-        }
-
-
-        w.println(res);
+        w.println(dp[l][0]);
     }
-
-    private static boolean find(long[][] g, int[] match, boolean[] visx, boolean[] visy, long[] lx, long[] ly, int i) {
-        // System.out.println("find bug");
-        visx[i] = true;
-        int l = g.length;
-        for (int j = 0; j < l; j++) {
-            if (!visy[j] && lx[i] + ly[j] == g[i][j]) {
-                visy[j] = true;
-                if (match[j] == -1 || find(g, match, visx, visy, lx, ly, match[j])) {
-                    match[j] = i;
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
 
 
     static class InputReader
@@ -289,7 +226,7 @@ public class Main implements Runnable
 
     public static void main(String args[]) throws Exception
     {
-        new Thread(null, new Main(),"Main",1<<27).start();
+        new Thread(null, new ABC163_E_Active_Infants_Dp_Greedy_Sort(),"Main",1<<27).start();
     }
 
 }
