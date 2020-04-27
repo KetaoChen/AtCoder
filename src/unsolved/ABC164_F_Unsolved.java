@@ -1,112 +1,92 @@
+package unsolved;
+
 import java.io.*;
 import java.util.*;
 import java.lang.*;
 
 
-public class Main implements Runnable
+public class ABC164_F_Unsolved implements Runnable
 {
     @Override
     public void run() {
         InputReader in = new InputReader(System.in);
         PrintWriter w = new PrintWriter(System.out);
-        int n = in.nextInt();
-        int[] arr = new int[n];
-        for (int i = 0; i < n; i++) {
-            arr[i] = in.nextInt();
-        }
-        getRes(arr, w);
+        int n = (int) in.nextLong();
+        long[] s = new long[n], t = new long[n], u = new long[n], v = new long[n];
+        for (int i = 0; i < n; i++) s[i] = in.nextLong();
+        for (int i = 0; i < n; i++) t[i] = in.nextLong();
+        for (int i = 0; i < n; i++) u[i] = in.nextLong();
+        for (int i = 0; i < n; i++) v[i] = in.nextLong();
+
+        getRes(n, s, t, u, v, w);
+
 
         w.flush();
         w.close();
     }
 
-    private static void getRes(int[] arr, PrintWriter w) {
-        // System.out.println("Start!");
-        int l = arr.length;
-        long[][] g = new long[l][l];
-        for (int i = 0; i < l; i++) {
-            for (int j = 0; j < l; j++) {
-                if (i == j) continue;
-                g[i][j] = (long)arr[i] * Math.abs(i - j);
-            }
+    private static void getRes(int n, long[] s, long[] t, long[] u, long[] v, PrintWriter w) {
+        long[][] upper = new long[n][n], lower = new long[n][n];
+        long[][] res = new long[n][n];
+        long[] target = new long[n * 2];
+        int count = 0;
+        for (int i = 0; i < 2 * n; i++) {
+            target[i] = i >= n ? v[i - n] : u[i];
         }
-
-        long res = 0;
-        boolean[] visx = new boolean[l];
-        boolean[] visy = new boolean[l];
-        long[] lx = new long[l], ly = new long[l];
-        int[] match = new int[l];
-
-        for (int i = 0; i < l; i++) {
-            for (int j = 0; j < l; j++) {
-                if (lx[i] < g[i][j]) {
-                    lx[i] = g[i][j];
-                }
-            }
-        }
-        Arrays.fill(match, -1);
-
-        for (int i = 0; i < l; i++) {
-            while (true) {
-                // System.out.println("while bug");
-                Arrays.fill(visx, false);
-                Arrays.fill(visy, false);
-                if (find(g, match, visx, visy, lx, ly, i)) break;
-
-                long d = Long.MAX_VALUE;
-                for (int j = 0; j < l; j++) {
-                    if (visx[j]) {
-                        for (int k = 0; k < l; k++) {
-                            if (!visy[k]) {
-                                d = Math.min(d, lx[j] + ly[k] - g[j][k]);
-                            }
-                        }
+        boolean[] match = new boolean[2 * n];
+        int[] m = new int[2 * n];
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                if (s[i] == 0 && t[j] == 0) {
+                    lower[i][j] = u[i] | v[j];
+                    if (u[i] == v[j]) {
+                        match[i] = true;
+                        match[j + n] = true;
+                        res[i][j] = u[i];
                     }
                 }
-                if (d == Integer.MAX_VALUE) {
-                    System.out.println("getres " + res);
-                    return;
-                }
-                for (int j = 0; j < l; j++) {
-                    if (visx[j]) {
-                        lx[j] -= d;
+                else if (s[i] == 1 && t[j] == 0) {
+                    lower[i][j] = u[i];
+                    upper[i][j] = v[j];
+                    if (u[i] == v[j]) {
+                        match[i] = true;
+                        match[j + n] = true;
+                        res[i][j] = u[i];
+                    }
+                    if (upper[i][j] != lower[i][j] && (upper[i][j] | lower[i][j]) == lower[i][j]) {
+                        w.println(-1);
+                        return;
                     }
                 }
-                for (int j = 0; j < l; j++) {
-                    if (visy[j]) {
-                        ly[j] += d;
+                else if (s[i] == 0 && t[j] == 1) {
+                    lower[i][j] = v[j];
+                    upper[i][j] = u[i];
+                    if (u[i] == v[j]) {
+                        match[i] = true;
+                        match[j + n] = true;
+                        res[i][j] = u[i];
+                    }
+                    if (upper[i][j] != lower[i][j] && (upper[i][j] | lower[i][j]) == lower[i][j]) {
+                        w.println(-1);
+                        return;
+                    }
+                }
+                else {
+                    upper[i][j] = u[i] & v[j];
+                    if (u[i] == v[j]) {
+                        match[i] = true;
+                        match[j + n] = true;
+                        res[i][j] = u[i];
                     }
                 }
             }
         }
 
-        // System.out.println("finish while");
-        for (int i = 0; i < l; i++) {
-            if (match[i] != - 1) {
-                res += g[match[i]][i];
-            }
-        }
 
 
-        w.println(res);
+
+        // w.println(res);
     }
-
-    private static boolean find(long[][] g, int[] match, boolean[] visx, boolean[] visy, long[] lx, long[] ly, int i) {
-        // System.out.println("find bug");
-        visx[i] = true;
-        int l = g.length;
-        for (int j = 0; j < l; j++) {
-            if (!visy[j] && lx[i] + ly[j] == g[i][j]) {
-                visy[j] = true;
-                if (match[j] == -1 || find(g, match, visx, visy, lx, ly, match[j])) {
-                    match[j] = i;
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
 
 
     static class InputReader
@@ -289,7 +269,7 @@ public class Main implements Runnable
 
     public static void main(String args[]) throws Exception
     {
-        new Thread(null, new Main(),"Main",1<<27).start();
+        new Thread(null, new ABC164_F_Unsolved(),"Main",1<<27).start();
     }
 
 }

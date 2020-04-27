@@ -1,9 +1,10 @@
 import java.io.*;
-import java.util.*;
-import java.lang.*;
+import java.util.HashMap;
+import java.util.InputMismatchException;
+import java.util.Map;
 
 
-public class Main2 implements Runnable
+public class ABC164_D_mod_addition implements Runnable
 {
     final static int mod = (int) (1e9 + 7);
     @Override
@@ -11,19 +12,24 @@ public class Main2 implements Runnable
         InputReader in = new InputReader(System.in);
         PrintWriter w = new PrintWriter(System.out);
 
-        int n = 2019;
-        for (int i = 0; i < 10000; i++) {
-            int num = n * i;
-            boolean p = true;
-            int s = 0;
-            while (num > 0) {
-                int d = num % 10;
-                if (d == 0) p = false;
-                s += d;
-                num /= 10;
-            }
-            if (p && s % 3 == 0) System.out.println(i * n);
+        String s = in.nextLine();
+        Map<Integer, Integer> map = new HashMap<>();
+
+        // 20190 % 2019 = 20000 % 2019 + 0190 % 2019;
+        int mod = 2019, res = 0;
+        map.put(0, 1);
+        int cur = 0, ten = 1;
+        for (int i = s.length() - 1; i >= 0; i--) {
+            int add = (s.charAt(i) - '0') * ten % mod;
+            cur = (cur + add) % mod;
+            // System.out.println(cur);
+
+            res += map.getOrDefault((cur + mod) % mod, 0);
+            map.put(cur, map.getOrDefault(cur, 0) + 1);
+            ten = ten * 10 % mod;
         }
+
+        w.println(res);
         w.flush();
         w.close();
     }
@@ -213,7 +219,7 @@ public class Main2 implements Runnable
 
     public static void main(String args[]) throws Exception
     {
-        new Thread(null, new Main2(),"Main",1<<27).start();
+        new Thread(null, new ABC164_D_mod_addition(),"Main",1<<27).start();
     }
 
 }
