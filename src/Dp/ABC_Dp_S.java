@@ -1,24 +1,57 @@
+package Dp;
+
 import java.io.*;
-import java.util.*;
-import java.lang.*;
+import java.util.ArrayList;
+import java.util.InputMismatchException;
+import java.util.List;
 
 
-public class Main2 implements Runnable
+public class ABC_Dp_S implements Runnable
 {
-    final static int mod = (int) (1e9 + 7);
     @Override
     public void run() {
         InputReader in = new InputReader(System.in);
         PrintWriter w = new PrintWriter(System.out);
-        getRes(in, w);
-
+        String K = in.nextLine();
+        int D = Integer.parseInt(in.nextLine());
+        w.println(getRes(K, D));
         w.flush();
         w.close();
     }
 
-    private static void getRes(InputReader in, PrintWriter w) {
+    private static long getRes(String K, int D) {
+        List<Integer> list = new ArrayList<>();
+        int mod = (int) (1e9 + 7), l = K.length(), sum = 0;
+        // dp[i][j] means the number of seq,  at index i, the sum % D = j except 0 and upper bound.
+        long[][] dp = new long[l + 1][D + 1];
 
+        for (int i = 1; i <= l; i++) {
+            int val = K.charAt(i - 1) - '0';
+            // for the dp part. we can add any number from 0 to 9.
+            for (int add = 0; add <= 9; add++) {
+                // for each the sum % D in the previous index.
+                for (int j = 0; j <= D; j++) {
+                    int cur = j + add;
+                    cur = cur > 0 && cur % D == 0 ? D : cur % D;
+                    dp[i][cur] = (dp[i][cur] + dp[i - 1][j]) % mod;
+                }
+            }
+
+            for (int add = 0; add < val; add++) {
+                int cur = sum + add;
+                cur = cur > 0 && cur % D == 0 ? D : cur % D;
+                dp[i][cur]++;
+            }
+
+            sum += val;
+        }
+
+        if (sum % D == 0) {
+            dp[l][D]++;
+        }
+        return dp[l][D] % mod;
     }
+
 
 
     static class InputReader
@@ -201,7 +234,7 @@ public class Main2 implements Runnable
 
     public static void main(String args[]) throws Exception
     {
-        new Thread(null, new Main2(),"Main",1<<27).start();
+        new Thread(null, new ABC_Dp_S(),"Main",1<<27).start();
     }
 
 }

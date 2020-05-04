@@ -1,57 +1,46 @@
+package Dp;
+
 import java.io.*;
-import java.util.HashSet;
 import java.util.InputMismatchException;
-import java.util.Set;
 
 
-public class ABC_Dp_U_Bitmask_Subset implements Runnable
+public class ABC_Dp_M implements Runnable
 {
     @Override
     public void run() {
         InputReader in = new InputReader(System.in);
         PrintWriter w = new PrintWriter(System.out);
         int N = in.nextInt();
-        int[][] arr = new int[N][N];
+        int K = in.nextInt();
+
+        int[] arr = new int[N];
         for (int i = 0; i < N; i++) {
-            for (int j = 0; j < N; j++) {
-                arr[i][j] = in.nextInt();
-            }
+            arr[i] = in.nextInt();
         }
-        w.println(getRes(arr, N));
+        w.println(getRes(arr, K));
 
         w.flush();
         w.close();
     }
 
-    private static long getRes(int[][] arr, int n) {
-        // use a bit to represent the set of rabbits that has been chosen.
-        // dp[i] means the max profit for set i;
+    private static long getRes(int[] arr, int K) {
+        // dp[i][j] is the number of ways for first ith children, with j candy hand out
+        int l = arr.length, mod = (int) (1e9 + 7);
+        long[][] dp = new long[l + 1][K + 1];
+        dp[0][0] = 1;
 
-        long[] dp = new long[1 << n];
-        // initiate all set, as they are in one group
-        for (int i = 0; i < 1 << n; i++) {
-            Set<Integer> set = new HashSet<>();
-            int val = i, d = 0;
-            while (val > 0) {
-                if ((val & 1) == 1) set.add(d);
-                d++;
-                val >>= 1;
-            }
-            for (int f : set) {
-                for (int s : set) {
-                    dp[i] += arr[f][s];
+        for (int i = 1; i <= l; i++) {
+            long sum = 0;
+            for (int j = 0; j <= K; j++) {
+                sum = (sum + dp[i - 1][j]) % mod;
+                if (j - arr[i - 1] > 0) {
+                    sum = (sum - dp[i - 1][j - arr[i - 1] - 1]) % mod;
                 }
-            }
-            dp[i] /= 2;
-        }
-
-        for (int i = 0; i < 1 << n; i++) {
-            for (int j = i; j > 0; j = (j - 1) & i) {
-                dp[i] = Math.max(dp[i], dp[j] + dp[i ^ j]);
+                dp[i][j] = sum;
             }
         }
 
-        return dp[(1 << n) - 1];
+        return (dp[l][K] + mod) % mod;
     }
 
 
@@ -236,7 +225,7 @@ public class ABC_Dp_U_Bitmask_Subset implements Runnable
 
     public static void main(String args[]) throws Exception
     {
-        new Thread(null, new ABC_Dp_U_Bitmask_Subset(),"Main",1<<27).start();
+        new Thread(null, new ABC_Dp_M(),"Main",1<<27).start();
     }
 
 }

@@ -1,48 +1,62 @@
 import java.io.*;
+import java.util.ArrayList;
 import java.util.InputMismatchException;
+import java.util.List;
 
 
-public class ABC_Dp_I implements Runnable
+public class ABC165_C_BackTrack implements Runnable
 {
+    final static int mod = (int) (1e9 + 7);
     @Override
     public void run() {
         InputReader in = new InputReader(System.in);
         PrintWriter w = new PrintWriter(System.out);
-        int N = (int) in.nextDouble();
-
-        double[] arr = new double[N];
-        for (int i = 0; i < N; i++) {
-            arr[i] = in.nextDouble();
-        }
-        w.println(getRes(arr));
-
+        int n = in.nextInt(), m = in.nextInt(), q = in.nextInt();
+        w.println(getRes(n, m, q, in));
+        w.println(c);
         w.flush();
         w.close();
     }
 
-    private static double getRes(double[] arr) {
-        // dp[i][j] is the probability for first ith coins, with j facing up
-        int l = arr.length;
-        double[][] dp = new double[l + 1][l + 1];
-        dp[0][0] = 1.0;
-
-        for (int i = 1; i <= l; i++) {
-            for (int j = 0; j <= i; j++) {
-                if (j == 0) {
-                    dp[i][j] = dp[i - 1][j] * (1 - arr[i - 1]);
-                    continue;
-                }
-                dp[i][j] = dp[i - 1][j] * (1 - arr[i - 1]) + dp[i - 1][j - 1] * arr[i - 1];
+    static int res = 0;
+    static int c = 0;
+    private static int getRes(int n, int m, int q, InputReader in) {
+        int[][][] max = new int[n][n][m + 1];
+        for (int k = 0; k < q; k++) {
+            int[] arr=  new int[4];
+            for (int i = 0; i < 4; i++) {
+                arr[i] = in.nextInt();
             }
+            // System.out.println(arr[0] + " " + arr[1] + " " + arr[2] + " " + arr[3]);
+            max[arr[0] - 1][arr[1] - 1][arr[2]] += arr[3];
+        }
+        List<Integer> list = new ArrayList<>();
+        for (int i = 1; i <= m; i++) {
+            helper(list, n, m, 1, max);
         }
 
-        double res = 0.0;
-        for (int i = l / 2 + 1; i <= l; i++) {
-            res += dp[l][i];
-        }
         return res;
     }
 
+    private static void helper(List<Integer> list, int n, int m, int val ,int[][][] s) {
+        if (list.size() == n) {
+            c++;
+            int temp = 0;
+            for (int i = 0; i < n; i++) {
+                for (int j = i + 1; j < n; j++) {
+                    temp += s[i][j][list.get(j) - list.get(i)];
+                }
+            }
+            res = Math.max(res, temp);
+            return;
+        }
+
+        for (int i = val; i <= m; i++) {
+            list.add(i);
+            helper(list, n, m, i, s);
+            list.remove(list.size() - 1);
+        }
+    }
 
 
     static class InputReader
@@ -225,7 +239,7 @@ public class ABC_Dp_I implements Runnable
 
     public static void main(String args[]) throws Exception
     {
-        new Thread(null, new ABC_Dp_I(),"Main",1<<27).start();
+        new Thread(null, new ABC165_C_BackTrack(),"Main",1<<27).start();
     }
 
 }

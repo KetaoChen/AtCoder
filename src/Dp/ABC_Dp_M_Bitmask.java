@@ -1,44 +1,43 @@
+package Dp;
+
 import java.io.*;
 import java.util.InputMismatchException;
 
 
-public class ABC_Dp_M implements Runnable
+public class ABC_Dp_M_Bitmask implements Runnable
 {
     @Override
     public void run() {
         InputReader in = new InputReader(System.in);
         PrintWriter w = new PrintWriter(System.out);
         int N = in.nextInt();
-        int K = in.nextInt();
-
-        int[] arr = new int[N];
+        int[][] arr = new int[N][N];
         for (int i = 0; i < N; i++) {
-            arr[i] = in.nextInt();
+            for (int j = 0; j < N; j++) {
+                arr[i][j] = in.nextInt();
+            }
         }
-        w.println(getRes(arr, K));
+        w.println(getRes(arr, N));
 
         w.flush();
         w.close();
     }
 
-    private static long getRes(int[] arr, int K) {
-        // dp[i][j] is the number of ways for first ith children, with j candy hand out
-        int l = arr.length, mod = (int) (1e9 + 7);
-        long[][] dp = new long[l + 1][K + 1];
-        dp[0][0] = 1;
+    private static int getRes(int[][] arr, int n) {
+        int mod = (int) (1e9 + 7);
+        // dp[i] represent the number of combo, up to the current female, the set of matched males
+        long[] dp = new long[1 << n];
+        dp[0] = 1;
 
-        for (int i = 1; i <= l; i++) {
-            long sum = 0;
-            for (int j = 0; j <= K; j++) {
-                sum = (sum + dp[i - 1][j]) % mod;
-                if (j - arr[i - 1] > 0) {
-                    sum = (sum - dp[i - 1][j - arr[i - 1] - 1]) % mod;
+        for (int j = 0; j < 1 << n; j++) {
+            int i = Integer.bitCount(j) - 1;
+            for (int k = 0; k < n; k++) {
+                if ((j >> k & 1) == 1 && arr[k][i] == 1) {
+                    dp[j] = (dp[j] + dp[j ^ 1 << k]) % mod;
                 }
-                dp[i][j] = sum;
             }
         }
-
-        return (dp[l][K] + mod) % mod;
+        return (int) dp[(1 << n) - 1];
     }
 
 
@@ -223,7 +222,7 @@ public class ABC_Dp_M implements Runnable
 
     public static void main(String args[]) throws Exception
     {
-        new Thread(null, new ABC_Dp_M(),"Main",1<<27).start();
+        new Thread(null, new ABC_Dp_M_Bitmask(),"Main",1<<27).start();
     }
 
 }

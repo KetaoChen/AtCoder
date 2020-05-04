@@ -1,8 +1,12 @@
+package Dp;
+
 import java.io.*;
+import java.util.HashSet;
 import java.util.InputMismatchException;
+import java.util.Set;
 
 
-public class ABC_Dp_M_Bitmask implements Runnable
+public class ABC_Dp_U_Bitmask_Subset implements Runnable
 {
     @Override
     public void run() {
@@ -21,21 +25,35 @@ public class ABC_Dp_M_Bitmask implements Runnable
         w.close();
     }
 
-    private static int getRes(int[][] arr, int n) {
-        int mod = (int) (1e9 + 7);
-        // dp[i] represent the number of combo, up to the current female, the set of matched males
-        long[] dp = new long[1 << n];
-        dp[0] = 1;
+    private static long getRes(int[][] arr, int n) {
+        // use a bit to represent the set of rabbits that has been chosen.
+        // dp[i] means the max profit for set i;
 
-        for (int j = 0; j < 1 << n; j++) {
-            int i = Integer.bitCount(j) - 1;
-            for (int k = 0; k < n; k++) {
-                if ((j >> k & 1) == 1 && arr[k][i] == 1) {
-                    dp[j] = (dp[j] + dp[j ^ 1 << k]) % mod;
+        long[] dp = new long[1 << n];
+        // initiate all set, as they are in one group
+        for (int i = 0; i < 1 << n; i++) {
+            Set<Integer> set = new HashSet<>();
+            int val = i, d = 0;
+            while (val > 0) {
+                if ((val & 1) == 1) set.add(d);
+                d++;
+                val >>= 1;
+            }
+            for (int f : set) {
+                for (int s : set) {
+                    dp[i] += arr[f][s];
                 }
             }
+            dp[i] /= 2;
         }
-        return (int) dp[(1 << n) - 1];
+
+        for (int i = 0; i < 1 << n; i++) {
+            for (int j = i; j > 0; j = (j - 1) & i) {
+                dp[i] = Math.max(dp[i], dp[j] + dp[i ^ j]);
+            }
+        }
+
+        return dp[(1 << n) - 1];
     }
 
 
@@ -220,7 +238,7 @@ public class ABC_Dp_M_Bitmask implements Runnable
 
     public static void main(String args[]) throws Exception
     {
-        new Thread(null, new ABC_Dp_M_Bitmask(),"Main",1<<27).start();
+        new Thread(null, new ABC_Dp_U_Bitmask_Subset(),"Main",1<<27).start();
     }
 
 }
